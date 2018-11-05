@@ -93,7 +93,7 @@ get_events = function(email_add){
 get_month_events = function(year, month){
     events = get_events(email)
     month_events = events %>%
-    filter(startDate > as.Date(paste(year, month, "01", sep = "-")) & startDate < Sys.Date())
+    filter(startDate > as.Date(paste(year, month, "01", sep = "-")) & startDate <= Sys.Date())
     #add hours column
     month_events$hours_long = round(difftime(as.POSIXct(month_events$endTime,format="%H:%M:%S"), as.POSIXct(month_events$startTime,format="%H:%M:%S"), units = "mins"),2)
     return(month_events)
