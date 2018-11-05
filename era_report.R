@@ -1,0 +1,282 @@
+########
+# to run in command line
+# a script to create weekly worksheets from google calendar events
+# intended to run at the end of each month
+# make sure set_up.R is run first and config.R is filled in
+
+# e.g. run, Rscript era_report.R MM YYYY
+#             - MM and YYYY are placeholders for the month and year that you want to report on
+########
+
+library(googlecalendar)
+library(googledrive)
+library(dplyr)
+library(googlesheets)
+library(chron)
+library(lubridate)
+args = commandArgs(trailingOnly = TRUE)
+
+template_id = "1VnKspMIR4UgXpV3ZfssZaSQkMUcY_GS96vHGrFHnvWw" # do not touch
+source("config.R")
+
+# authentication
+gc_auth(key = client_id, secret = client_secret, cache = TRUE) # authenticate for Google Sheets
+gs_auth(key = client_id, secret = client_secret, cache = TRUE) # authenticate for Google Cal
+
+
+# globals
+month = args[1]
+if (is.na(month)){
+    month = format(as.Date(Sys.Date()-months(1)), "%m")
+    
+}
+
+year = args[2]
+if (is.na(year)){
+    year = format(as.Date(Sys.Date()), "%Y")
+}
+
+# functions
+copy_report = function(year, month, member, dest_folder_id, template_id){
+    month_name = month.abb[as.numeric(month)]
+    report_name <- paste0(month_name, year, "_eRA-report_", member)
+    folder_contents = drive_ls(as_id(dest_folder_id))
+    if (report_name %in% folder_contents$name){ # check if report already exists and handle as appropriate
+        existing_report_ids = folder_contents %>% filter(name==report_name) %>% select(id)
+        if (nrow(existing_report_ids) > 1){
+            for (id in existing_report_ids$id[-1]){
+                drive_mv(as_id(id), name = paste0(report_name, "_OLD"))
+            }
+            
+        }
+        return(existing_report_ids$id[1])
+        
+    } else { # else if report doesn't exist copy from template
+        file = drive_cp(as_id(template_id), path = as_id(dest_folder_id), name = report_name)
+        file_id = file$id
+        return(file_id)
+        
+    }
+    
+}
+get_month_eow_dates = function(year, month){
+    month_first_day = paste(year,month, "01", sep='-')
+    month_dates = data.frame(dates = as.Date(seq.Date(from = as.Date(month_first_day), by = "day", length.out = 31)))
+    eow_dates = data.frame(eow_dates = as.character(), stringsAsFactors = FALSE)
+    for (i in 1:nrow(month_dates)){
+        if (weekdays(as.Date(month_dates[i,1])) == "Friday"){
+            eow_dates = rbind(eow_dates, as.character(month_dates[i,1]), stringsAsFactors = FALSE)
+            
+        }
+    }
+    eow_dates = rbind(eow_dates, as.character(Sys.Date()), stringsAsFactors = FALSE)
+    names(eow_dates) = "eow_dates"
+    return(eow_dates)
+}
+
+get_events = function(email_add){
+    events = gc_summary(email_add) %>%
+    gc_event_ls(params = "maxResults=2500") %>%
+    mutate(startDate = paste(start.date, start.dateTime), endDate = paste(end.date, end.dateTime),
+    startTime = gsub("[0-9]{4}-[0-9]{2}-[0-9]{2}T|\\+[0-9]{2}:[0-9]{2}", "", start.dateTime),
+    endTime = gsub("[0-9]{4}-[0-9]{2}-[0-9]{2}T|\\+[0-9]{2}:[0-9]{2}", "", end.dateTime))#%>% filter(start.date>Sys.Date()-20)
+    
+    events$startDate = trimws(gsub("(NA)", "", events$startDate))
+    events$endDate = trimws(gsub("NA", "", events$endDate))
+    
+    events$startDate = trimws(gsub("T[0-9]{2}:[0-9]{2}:[0-9]{2}\\+[0-9]{2}:[0-9]{2}", "", events$startDate))
+    events$endDate = trimws(gsub("T[0-9]{2}:[0-9]{2}:[0-9]{2}\\+[0-9]{2}:[0-9]{2}", "", events$endDate))
+    
+    return(events[with(events, order(as.Date(startDate), as.Date(endDate))),])
+}
+
+get_month_events = function(year, month){
+    events = get_events(email)
+    month_events = events %>%
+    filter(startDate > as.Date(paste(year, month, "01", sep = "-")) & startDate < Sys.Date())
+    #add hours column
+    month_events$hours_long = round(difftime(as.POSIXct(month_events$endTime,format="%H:%M:%S"), as.POSIXct(month_events$startTime,format="%H:%M:%S"), units = "mins"),2)
+    return(month_events)
+}
+
+## connect with google sheet DVCR report
+report_gs = function(report_file_id){
+    # month_name = month.abb[as.numeric(month)]
+    #  report_name <- paste0(month_name, year, "_eRA-report_", member)
+    report <- gs_key(as_id(report_file_id))
+}
+
+## getting collapsing events with the same title into one with total hours work
+table_clean_up = function(table){
+    locs_to_remove = NULL
+    for (i in 1:nrow(table)){
+        print(i)
+        if (length(grep(table$Task[i], table$Task)) > 1){
+            locs = grep(table$Task[i], table$Task)
+            subset = table[locs,]
+            sum_hours = sum(as.numeric(subset$`Hours`))
+            table$`Hours`[i]=sum_hours
+            # create date range when the same event is done over different dates
+            if (as.Date(subset$Date[1])!=as.Date(tail(subset$Date, 1))){
+                date_range = paste(subset$Date[1], tail(subset$Date, 1), sep = "-")
+                table$Date[i]=date_range
+            }
+            remove_locs = tail(locs, length(locs)-1)
+            locs_to_remove = c(locs_to_remove, remove_locs)
+        }
+    }
+    if (!is.null(locs_to_remove)){
+        table = table[-c(locs_to_remove),]
+    }
+    
+    return(table)
+}
+
+top_10_projects = function(){
+    # return a list of top 10 projects by Hours
+    weeks_combined = rbind(table_insert_week1, table_insert_week2, table_insert_week3, table_insert_week4, table_insert_week5)
+    weeks_combined = aggregate(as.numeric(weeks_combined$`Hours`), list(weeks_combined$Task), sum)
+    weeks_combined = weeks_combined[order(weeks_combined$x, decreasing = TRUE),]
+    return(head(weeks_combined, 10))
+}
+
+top_20_projects = function(){
+    # return a list of top 10 projects by Hours
+    weeks_combined = rbind(table_insert_week1, table_insert_week2, table_insert_week3, table_insert_week4, table_insert_week5)
+    weeks_combined = aggregate(as.numeric(weeks_combined$`Hours`), list(weeks_combined$Task), sum)
+    weeks_combined = weeks_combined[order(weeks_combined$x, decreasing = TRUE),]
+    names(weeks_combined) = c("activities", "hours")
+    weeks_combined = data.frame(weeks_combined$activities, NA, weeks_combined$hours)
+    return(head(weeks_combined, 20))
+}
+
+insert_weekly_tables = function(month_weeks, table_insert_week1, table_insert_week2, table_insert_week3, table_insert_week4, table_insert_week5){
+    #insert eow dates in Monthly report sheet
+    report %>% gs_edit_cells(ws = "Monthly report", input = month_weeks, anchor = "B8", byrow = TRUE, col_names = FALSE)
+    #insert top 10 projects in Monthly report sheet
+    top_20_projects = top_20_projects()
+    report %>% gs_edit_cells(ws = "Monthly report", input = top_20_projects, anchor = "B16", byrow = TRUE, col_names = FALSE)
+    
+    #insert weekly sheets to Google
+    anchor = "A4"
+    
+    week = "Week 1"
+    if (nrow(table_insert_week1)!=0){
+        table_insert_week1 = table_clean_up(table_insert_week1)
+        table_insert_week1 = table_insert_week1[,c(5,1:4)]
+        report %>% gs_edit_cells(ws = week, input = table_insert_week1, anchor = anchor, byrow = TRUE)
+    }
+    
+    
+    week = "Week 2"
+    if (nrow(table_insert_week2)!=0){
+        table_insert_week2 = table_clean_up(table_insert_week2)
+        table_insert_week2 = table_insert_week2[,c(5,1:4)]
+        report %>% gs_edit_cells(ws = week, input = table_insert_week2, anchor = anchor, byrow = TRUE)
+    }
+    week = "Week 3"
+    if (nrow(table_insert_week3)!=0){
+        table_insert_week3 = table_clean_up(table_insert_week3)
+        table_insert_week3 = table_insert_week3[,c(5,1:4)]
+        report %>% gs_edit_cells(ws = week, input = table_insert_week3, anchor = anchor, byrow = TRUE)
+    }
+    
+    week = "Week 4"
+    if (nrow(table_insert_week4)!=0){
+        table_insert_week4 = table_clean_up(table_insert_week4)
+        table_insert_week4 = table_insert_week4[,c(5,1:4)]
+        report %>% gs_edit_cells(ws = week, input = table_insert_week4, anchor = anchor, byrow = TRUE)
+    }
+    
+    week = "Week 5"
+    if (nrow(table_insert_week5)!=0){
+        table_insert_week5 = table_clean_up(table_insert_week5)
+        table_insert_week5 = table_insert_week5[,c(5,1:4)]
+        report %>% gs_edit_cells(ws = week, input = table_insert_week5, anchor = anchor, byrow = TRUE)
+    }
+}
+
+
+report_file_id <- copy_report(year, month, member, dest_folder_id, template_id)
+report <-  report_gs(report_file_id)
+report_monthlyReport <- report %>% gs_read(ws = "Monthly report")
+month_weeks <- get_month_eow_dates(year, month)
+month_events <- get_month_events(year,month)
+
+table_insert_week1 <- data.frame("Hours" = as.character(), "Task" = as.character(), "Description" = as.character(), "Contact" = as.character(), "Date" = as.character(), stringsAsFactors = FALSE)
+table_insert_week2 <- data.frame("Hours" = as.character(), "Task" = as.character(), "Description" = as.character(), "Contact" = as.character(), "Date" = as.character(), stringsAsFactors = FALSE)
+table_insert_week3 <- data.frame("Hours" = as.character(), "Task" = as.character(), "Description" = as.character(), "Contact" = as.character(), "Date" = as.character(), stringsAsFactors = FALSE)
+table_insert_week4 <- data.frame("Hours" = as.character(), "Task" = as.character(), "Description" = as.character(), "Contact" = as.character(), "Date" = as.character(), stringsAsFactors = FALSE)
+table_insert_week5 <- data.frame("Hours" = as.character(), "Task" = as.character(), "Description" = as.character(), "Contact" = as.character(), "Date" = as.character(), stringsAsFactors = FALSE)
+#for loop to create weekly work sheets
+for (i in 1:nrow(month_events)){
+    date = month_events$startDate[i]
+    
+    
+    ## clean ups
+    if (grepl("\\$", month_events$summary[i])) {
+        title = gsub("(.*)(\\$)(.*)", "\\1", month_events$summary[i])
+    } else {
+        title = month_events$summary[i]
+    }
+    
+    if (grepl("\\$", month_events$summary[i])){
+        who = gsub("(.*)(\\$)(.*)", "\\3", month_events$summary[i])
+    } else if (month_events$organizer.self[i] == FALSE) {
+        who = month_events$organizer.displayName[i]
+    } else {
+        who = "NA"
+    }
+    
+    is_zoom_meeting = grepl("zoom.us", month_events$description[i])
+    is_training = grepl("Course Materials", month_events$description[i])
+    if(is_zoom_meeting) {
+        description = "Video conference"
+    } else if (is_training) {
+        description = "Training"
+    } else {
+        description = month_events$description[i]
+    }
+    minutes = month_events$hours_long[i]
+    hours = (as.numeric(minutes)%/%60 +  (as.numeric(minutes)%%60/60))
+    
+    input = cbind(hours, title,
+    description,
+    who, date)
+    input = data.frame(input, stringsAsFactors = FALSE)
+    if (date <= as.Date(as.character(month_weeks[1,1]), "%Y-%m-%d")){
+        names(input) = names(table_insert_week1)
+        table_insert_week1 = rbind(table_insert_week1, input)
+        names(table_insert_week1) = c("Hours", "Task", "Description", "Contact", "Date")
+        
+    } else if (date > as.Date(as.character(month_weeks[1,1]), "%Y-%m-%d") & date <= as.Date(as.character(month_weeks[2,1]), "%Y-%m-%d")){
+        names(input) = names(table_insert_week2)
+        table_insert_week2 = rbind(table_insert_week2, input)
+        names(table_insert_week2) = c("Hours", "Task", "Description", "Contact", "Date")
+        
+    } else if (date > as.Date(as.character(month_weeks[2,1]), "%Y-%m-%d") & date <= as.Date(as.character(month_weeks[3,1]), "%Y-%m-%d")){
+        names(input) = names(table_insert_week3)
+        table_insert_week3 = rbind(table_insert_week3, input)
+        names(table_insert_week3) = c("Hours", "Task", "Description", "Contact", "Date")
+        
+    } else if (date > as.Date(as.character(month_weeks[3,1]), "%Y-%m-%d") & date <= as.Date(as.character(month_weeks[4,1]), "%Y-%m-%d")){
+        names(input) = names(table_insert_week4)
+        table_insert_week4 = rbind(table_insert_week4, input)
+        names(table_insert_week4) = c("Hours", "Task", "Description", "Contact", "Date")
+        
+    } else if (date > as.Date(as.character(month_weeks[4,1]), "%Y-%m-%d") & date <= as.Date(as.character(month_weeks[5,1]), "%Y-%m-%d")){
+        names(input) = names(table_insert_week5)
+        table_insert_week5 = rbind(table_insert_week5, input)
+        names(table_insert_week5) = c("Hours", "Task", "Description", "Contact", "Date")
+        
+    }
+}
+
+
+insert_weekly_tables(month_weeks, table_insert_week1, table_insert_week2, table_insert_week3, table_insert_week4, table_insert_week5)
+
+# insert report details
+report_details = rbind(report_stakeholder, member, eRA_name)
+report %>% gs_edit_cells(ws = "Monthly report", input = report_details, anchor = "B2", byrow = TRUE, col_names = FALSE)
+
+
