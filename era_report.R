@@ -59,6 +59,7 @@ copy_report = function(year, month, member, dest_folder_id, template_id){
     }
     
 }
+
 get_month_eow_dates = function(year, month){
     month_first_day = paste(year,month, "01", sep='-')
     month_dates = data.frame(dates = as.Date(seq.Date(from = as.Date(month_first_day), by = "day", length.out = 31)))
@@ -135,24 +136,27 @@ table_clean_up = function(table){
 top_10_projects = function(){
     # return a list of top 10 projects by Hours
     weeks_combined = rbind(table_insert_week1, table_insert_week2, table_insert_week3, table_insert_week4, table_insert_week5)
-    weeks_combined = aggregate(as.numeric(weeks_combined$`Hours`), list(weeks_combined$Task), sum)
+    weeks_combined = aggregate(as.numeric(weeks_combined$`Hours`), list(weeks_combined$Task, weeks_combined$Tag), sum)
     weeks_combined = weeks_combined[order(weeks_combined$x, decreasing = TRUE),]
+    names(weeks_combined) = c("activities", "tag", "hours")
+    weeks_combined = data.frame(weeks_combined$activities, weeks_combined$tag, weeks_combined$hours)
     return(head(weeks_combined, 10))
 }
 
 top_20_projects = function(){
     # return a list of top 10 projects by Hours
     weeks_combined = rbind(table_insert_week1, table_insert_week2, table_insert_week3, table_insert_week4, table_insert_week5)
-    weeks_combined = aggregate(as.numeric(weeks_combined$`Hours`), list(weeks_combined$Task), sum)
+    weeks_combined = aggregate(as.numeric(weeks_combined$`Hours`), list(weeks_combined$Task, weeks_combined$Activity), sum)
     weeks_combined = weeks_combined[order(weeks_combined$x, decreasing = TRUE),]
-    names(weeks_combined) = c("activities", "hours")
-    weeks_combined = data.frame(weeks_combined$activities, NA, weeks_combined$hours)
+    names(weeks_combined) = c("task", "activity", "hours")
+    weeks_combined = data.frame(weeks_combined$task, weeks_combined$activity, weeks_combined$hours)
     return(head(weeks_combined, 20))
 }
 
 insert_weekly_tables = function(month_weeks, table_insert_week1, table_insert_week2, table_insert_week3, table_insert_week4, table_insert_week5){
     #insert eow dates in Monthly report sheet
     report %>% gs_edit_cells(ws = "Monthly report", input = month_weeks, anchor = "B8", byrow = TRUE, col_names = FALSE)
+    
     #insert top 10 projects in Monthly report sheet
     top_20_projects = top_20_projects()
     report %>% gs_edit_cells(ws = "Monthly report", input = top_20_projects, anchor = "B16", byrow = TRUE, col_names = FALSE)
@@ -163,35 +167,33 @@ insert_weekly_tables = function(month_weeks, table_insert_week1, table_insert_we
     week = "Week 1"
     if (nrow(table_insert_week1)!=0){
         table_insert_week1 = table_clean_up(table_insert_week1)
-        table_insert_week1 = table_insert_week1[,c(5,1:4)]
+        table_insert_week1 = table_insert_week1[,c(6,1:5)]
         report %>% gs_edit_cells(ws = week, input = table_insert_week1, anchor = anchor, byrow = TRUE)
     }
-    
-    
     week = "Week 2"
     if (nrow(table_insert_week2)!=0){
         table_insert_week2 = table_clean_up(table_insert_week2)
-        table_insert_week2 = table_insert_week2[,c(5,1:4)]
+        table_insert_week2 = table_insert_week2[,c(6,1:5)]
         report %>% gs_edit_cells(ws = week, input = table_insert_week2, anchor = anchor, byrow = TRUE)
     }
     week = "Week 3"
     if (nrow(table_insert_week3)!=0){
         table_insert_week3 = table_clean_up(table_insert_week3)
-        table_insert_week3 = table_insert_week3[,c(5,1:4)]
+        table_insert_week3 = table_insert_week3[,c(6,1:5)]
         report %>% gs_edit_cells(ws = week, input = table_insert_week3, anchor = anchor, byrow = TRUE)
     }
     
     week = "Week 4"
     if (nrow(table_insert_week4)!=0){
         table_insert_week4 = table_clean_up(table_insert_week4)
-        table_insert_week4 = table_insert_week4[,c(5,1:4)]
+        table_insert_week4 = table_insert_week4[,c(6,1:5)]
         report %>% gs_edit_cells(ws = week, input = table_insert_week4, anchor = anchor, byrow = TRUE)
     }
     
     week = "Week 5"
     if (nrow(table_insert_week5)!=0){
         table_insert_week5 = table_clean_up(table_insert_week5)
-        table_insert_week5 = table_insert_week5[,c(5,1:4)]
+        table_insert_week5 = table_insert_week5[,c(6,1:5)]
         report %>% gs_edit_cells(ws = week, input = table_insert_week5, anchor = anchor, byrow = TRUE)
     }
 }
@@ -203,23 +205,24 @@ report_monthlyReport <- report %>% gs_read(ws = "Monthly report")
 month_weeks <- get_month_eow_dates(year, month)
 month_events <- get_month_events(year,month)
 
-table_insert_week1 <- data.frame("Hours" = as.character(), "Task" = as.character(), "Description" = as.character(), "Contact" = as.character(), "Date" = as.character(), stringsAsFactors = FALSE)
-table_insert_week2 <- data.frame("Hours" = as.character(), "Task" = as.character(), "Description" = as.character(), "Contact" = as.character(), "Date" = as.character(), stringsAsFactors = FALSE)
-table_insert_week3 <- data.frame("Hours" = as.character(), "Task" = as.character(), "Description" = as.character(), "Contact" = as.character(), "Date" = as.character(), stringsAsFactors = FALSE)
-table_insert_week4 <- data.frame("Hours" = as.character(), "Task" = as.character(), "Description" = as.character(), "Contact" = as.character(), "Date" = as.character(), stringsAsFactors = FALSE)
-table_insert_week5 <- data.frame("Hours" = as.character(), "Task" = as.character(), "Description" = as.character(), "Contact" = as.character(), "Date" = as.character(), stringsAsFactors = FALSE)
+table_insert_week1 <- data.frame("Hours" = as.character(), "Task" = as.character(), "Activity" = as.character(), "Description" = as.character(), "Contact" = as.character(), "Date" = as.character(), stringsAsFactors = FALSE)
+table_insert_week2 <- data.frame("Hours" = as.character(), "Task" = as.character(), "Activity" = as.character(), "Description" = as.character(), "Contact" = as.character(), "Date" = as.character(), stringsAsFactors = FALSE)
+table_insert_week3 <- data.frame("Hours" = as.character(), "Task" = as.character(), "Activity" = as.character(), "Description" = as.character(), "Contact" = as.character(), "Date" = as.character(), stringsAsFactors = FALSE)
+table_insert_week4 <- data.frame("Hours" = as.character(), "Task" = as.character(), "Activity" = as.character(), "Description" = as.character(), "Contact" = as.character(), "Date" = as.character(), stringsAsFactors = FALSE)
+table_insert_week5 <- data.frame("Hours" = as.character(), "Task" = as.character(), "Activity" = as.character(), "Description" = as.character(), "Contact" = as.character(), "Date" = as.character(), stringsAsFactors = FALSE)
 #for loop to create weekly work sheets
 for (i in 1:nrow(month_events)){
     date = month_events$startDate[i]
     
-    
     ## clean ups
+    # utilising title of event
     if (grepl("\\$", month_events$summary[i])) {
         title = gsub("(.*)(\\$)(.*)", "\\1", month_events$summary[i])
     } else {
         title = month_events$summary[i]
     }
     
+    # utilising who or "Contact"
     if (grepl("\\$", month_events$summary[i])){
         who = gsub("(.*)(\\$)(.*)", "\\3", month_events$summary[i])
     } else if (month_events$organizer.self[i] == FALSE) {
@@ -228,6 +231,14 @@ for (i in 1:nrow(month_events)){
         who = "NA"
     }
     
+    # utilising tags or "Activities"
+    if (grepl("\\:", month_events$summary[i])){
+      tag = gsub("(.*)(\\:)(.*)", "\\1", month_events$summary[i])
+    } else {
+      tag = "untagged"
+    }
+    
+    # cleaning up common long-winded descriptions
     is_zoom_meeting = grepl("zoom.us", month_events$description[i])
     is_training = grepl("Course Materials", month_events$description[i])
     if(is_zoom_meeting) {
@@ -240,34 +251,37 @@ for (i in 1:nrow(month_events)){
     minutes = month_events$hours_long[i]
     hours = (as.numeric(minutes)%/%60 +  (as.numeric(minutes)%%60/60))
     
-    input = cbind(hours, title,
-    description,
-    who, date)
+    input = cbind(hours, 
+                  title,
+                  tag,
+                  description,
+                  who, 
+                  date)
     input = data.frame(input, stringsAsFactors = FALSE)
     if (date <= as.Date(as.character(month_weeks[1,1]), "%Y-%m-%d")){
         names(input) = names(table_insert_week1)
         table_insert_week1 = rbind(table_insert_week1, input)
-        names(table_insert_week1) = c("Hours", "Task", "Description", "Contact", "Date")
+        names(table_insert_week1) = c("Hours", "Task", "Activity", "Description", "Contact", "Date")
         
     } else if (date > as.Date(as.character(month_weeks[1,1]), "%Y-%m-%d") & date <= as.Date(as.character(month_weeks[2,1]), "%Y-%m-%d")){
         names(input) = names(table_insert_week2)
         table_insert_week2 = rbind(table_insert_week2, input)
-        names(table_insert_week2) = c("Hours", "Task", "Description", "Contact", "Date")
+        names(table_insert_week1) = c("Hours", "Task", "Activity", "Description", "Contact", "Date")
         
     } else if (date > as.Date(as.character(month_weeks[2,1]), "%Y-%m-%d") & date <= as.Date(as.character(month_weeks[3,1]), "%Y-%m-%d")){
         names(input) = names(table_insert_week3)
         table_insert_week3 = rbind(table_insert_week3, input)
-        names(table_insert_week3) = c("Hours", "Task", "Description", "Contact", "Date")
+        names(table_insert_week1) = c("Hours", "Task", "Activity", "Description", "Contact", "Date")
         
     } else if (date > as.Date(as.character(month_weeks[3,1]), "%Y-%m-%d") & date <= as.Date(as.character(month_weeks[4,1]), "%Y-%m-%d")){
         names(input) = names(table_insert_week4)
         table_insert_week4 = rbind(table_insert_week4, input)
-        names(table_insert_week4) = c("Hours", "Task", "Description", "Contact", "Date")
+        names(table_insert_week1) = c("Hours", "Task", "Activity", "Description", "Contact", "Date")
         
     } else if (date > as.Date(as.character(month_weeks[4,1]), "%Y-%m-%d") & date <= as.Date(as.character(month_weeks[5,1]), "%Y-%m-%d")){
         names(input) = names(table_insert_week5)
         table_insert_week5 = rbind(table_insert_week5, input)
-        names(table_insert_week5) = c("Hours", "Task", "Description", "Contact", "Date")
+        names(table_insert_week1) = c("Hours", "Task", "Activity", "Description", "Contact", "Date")
         
     }
 }
@@ -277,6 +291,7 @@ insert_weekly_tables(month_weeks, table_insert_week1, table_insert_week2, table_
 
 # insert report details
 report_details = rbind(report_stakeholder, member, eRA_name)
-report %>% gs_edit_cells(ws = "Monthly report", input = report_details, anchor = "B2", byrow = TRUE, col_names = FALSE)
+report %>% 
+  gs_edit_cells(ws = "Monthly report", input = report_details, anchor = "B2", byrow = TRUE, col_names = FALSE)
 
 
