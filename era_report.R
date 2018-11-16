@@ -17,7 +17,7 @@ library(lubridate)
 args = commandArgs(trailingOnly = TRUE)
 
 template_id = "1VnKspMIR4UgXpV3ZfssZaSQkMUcY_GS96vHGrFHnvWw" # do not touch
-source("config.R")
+source("config.r")
 
 # authentication
 gc_auth(key = client_id, secret = client_secret, cache = TRUE) # authenticate for Google Sheets
@@ -294,4 +294,8 @@ report_details = rbind(report_stakeholder, member, eRA_name)
 report %>% 
   gs_edit_cells(ws = "Monthly report", input = report_details, anchor = "B2", byrow = TRUE, col_names = FALSE)
 
+report_link = report$browser_url
+message(paste("Report saved to", report_link))
 
+# sending era report link
+system(paste("Rscript email_out.R", report_link))

@@ -11,6 +11,7 @@ This program will:
 2. *Create a report*. It will copy from the Google Sheets [template](https://docs.google.com/spreadsheets/d/1VnKspMIR4UgXpV3ZfssZaSQkMUcY_GS96vHGrFHnvWw/edit?usp=sharing) or write over the top of an existing report (produced if you have run the script for this month before)
 3. *Access your calendar*, grabbing all events in your Intersect (Gmail) calendar for that month
 4. *Fill the report*, inserting all events data into the preformatted Google Sheets 
+5. *Send out a notification email*, you have a choice to send an email to yourself and report stakeholder to let them know it's been completed (see `config.R`).
 
 ### Running the script
 It is possible to just run `Rscript eRA_report.R`, as long as you want the report generated for the previous month. Otherwise, you can give it month and/or year arguments for the month that you want to report on (e.g., `Rscript eRA_report.R "07" "2018"`).
@@ -42,7 +43,7 @@ For the Google API credentials, see the instructions below.
 ### For the Google API authentication
 1. Go to [console.developers.google.com](console.developers.google.com) and create a Project (top drop-down)
 2. Go into the project and click on `Enable APIs and Services`
-3. `Enable` both the `Google Calendar API` and `Google Drive API` for this Project
+3. `Enable` the `Google Calendar API`, `Gmail API` and `Google Drive API` for this Project
 4. Back at the dashboard, go to `Credentials` and click on `Create credentials` and select `Create OAuth client ID`
 5. Select `Web application`. (you may have to set up the OAuth consent screen first, basically just give it a product name)
 6. Fill in the details for `Name` and `Authorised redirect URI`. The latter must be `http://localhost:1410/`
