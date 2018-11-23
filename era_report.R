@@ -19,6 +19,7 @@ source("functions.R")
 # authentication
 gc_auth(key = client_id, secret = client_secret, cache = TRUE) # authenticate for Google Sheets
 gs_auth(key = client_id, secret = client_secret, cache = TRUE) # authenticate for Google Cal
+gmail_auth(id = client_id, secret = client_secret) # authenticate for Gmail
 
 source("report_authority.R")
 

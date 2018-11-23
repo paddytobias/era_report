@@ -173,6 +173,6 @@ insert_weekly_tables = function(month_weeks, table_insert_week1, table_insert_we
 email_func = function(recipient_email, sender_email, recipient_name, report_link){
   email = mime(To = recipient_email, From = sender_email, 
                Subject = "New eRA report prepared",
-               body = paste0("Hi ", recipient_name, ", A new monthly report has been created for you.\nIt can be found here: ", report_link))
+                body = paste0("Hi ", recipient_name, ", A new monthly report has been created for you.\n\nIt can be found here: ", report_link, "\n\n Regards"))
   return(email)
 }

@@ -20,12 +20,6 @@ if (member == "Deakin University"){
 dest_folder_id = as.character(config["dest_folder_id"])
 eRA_name = as.character(config$era_name)
 
-gmail_auth(id = client_id, secret = client_secret) # authenticate for Gmail
-
-#era_email = email 
-
-
-
 
 if (config$send_to_stakeholder == FALSE & config$send_to_you == TRUE){
     email = email_func(era, era, eRA_name, report_link)
