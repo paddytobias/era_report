@@ -178,7 +178,7 @@ for (i in 1:nrow(config_data)){
       gs_read(ws = "era_activities")
     
     mvr_era_activities = mvr_era_activities %>% 
-      filter(Date > as.Date(ymd(paste0(year,month,"01"))) & era_email != as.symbol(era_email))
+      filter((Date > as.Date(ymd(paste0(year,month,"01"))) & era_email == as.symbol(era_email)))
     
     names(mvr_era_activities) = names(mvr_input)
     
