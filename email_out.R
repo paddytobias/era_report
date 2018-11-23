@@ -2,7 +2,7 @@
 source("libraries.R")
 source("report_authority.R")
 source("functions.R")
-source("config_dev.r")
+source("config.r")
 
 
 args = commandArgs(trailingOnly = TRUE)
