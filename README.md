@@ -11,7 +11,7 @@ Both 1.0 and 2.0 can be run the same way.
 ---
 
 ## Set up (do this before anything else)
-Clone 2.0: `git clone --single-branch -b 2.0 https://github.com/paddytobias/era_reports`
+Clone 2.0: `git clone https://github.com/paddytobias/era_reports`
 
 ### Install packages
 There's a few dependences for this script. You'll need to install all by running `Rscript set_up.R`
