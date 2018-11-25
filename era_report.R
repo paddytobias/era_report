@@ -177,12 +177,16 @@ for (i in 1:nrow(config_data)){
     mvr_era_activities = mvr_data %>% 
       gs_read(ws = "era_activities")
     
-    mvr_era_activities = mvr_era_activities %>% 
-      filter((Date > as.Date(ymd(paste0(year,month,"01"))) & era_email == as.symbol(era_email)))
+    email = era_email
+    old_mvr = mvr_era_activities %>% 
+      filter(era_email == email & as.Date(Date) >= as.Date(ymd(paste0(year,month,"01"))))
+
+    new_mvr = mvr_era_activities %>% 
+      anti_join(old_mvr)
     
-    names(mvr_era_activities) = names(mvr_input)
+    names(new_mvr) = names(mvr_input)
     
-    mvr_input = rbind(mvr_era_activities, mvr_input)
+    mvr_input = rbind(new_mvr, mvr_input)
     
     mvr_data %>% 
       gs_edit_cells(ws = "era_activities", input = mvr_input, anchor = "A1", byrow = TRUE, col_names = TRUE) 
