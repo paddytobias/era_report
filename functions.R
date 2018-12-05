@@ -1,7 +1,7 @@
 source("libraries.R")
 
 # functions
-copy_report = function(year, month, member, dest_folder_id, template_id){
+copy_report = function(year, month, member, dest_folder_id, template_id, stakeholder_email){
   month_name = month.abb[as.numeric(month)]
   report_name <- paste0(month_name, year, "_eRA-report_", member)
   folder_contents = drive_ls(as_id(dest_folder_id))
@@ -18,6 +18,9 @@ copy_report = function(year, month, member, dest_folder_id, template_id){
   } else { # else if report doesn't exist copy from template
     file = drive_cp(as_id(template_id), path = as_id(dest_folder_id), name = report_name)
     file_id = file$id
+    drive_share(as_id(file_id),role = "reader", type = "anyone") # anyone will be able to see this report with the link
+    # could use the following for assigning permissions ONLY to stakeholder, but this would require them to have a Google account and for use to be using this account to share to
+    # drive_share(as_id(file_id),role = "reader", type = "user", emailAddress = stakeholder_email)
     return(file_id)
     
   }
@@ -170,9 +173,10 @@ insert_weekly_tables = function(month_weeks, table_insert_week1, table_insert_we
 }
 
 
-email_func = function(recipient_email, sender_email, recipient_name, report_link){
-  email = mime(To = recipient_email, From = sender_email, 
+email_func = function(recipient_email, sender_email, recipient_name, report_link, era_name){
+  email = mime(To = recipient_email, 
+               From = sender_email, 
                Subject = "New eRA report prepared",
-                body = paste0("Hi ", recipient_name, ", A new monthly report has been created for you.\n\nIt can be found here: ", report_link, "\n\n Regards"))
+                body = paste0("Hi ", recipient_name, ", A new monthly report has been created for you.\n\nIt can be found here: ", report_link, "\n Regards,\n", era_name))
   return(email)
 }

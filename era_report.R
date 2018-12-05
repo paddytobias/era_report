@@ -19,7 +19,7 @@ source("functions.R")
 # authentication
 gc_auth(key = client_id, secret = client_secret, cache = TRUE) # authenticate for Google Sheets
 gs_auth(key = client_id, secret = client_secret, cache = TRUE) # authenticate for Google Cal
-gmail_auth(id = client_id, secret = client_secret) # authenticate for Gmail
+#gmail_auth(id = client_id, secret = client_secret) # authenticate for Gmail
 
 source("report_authority.R")
 
@@ -52,12 +52,15 @@ for (i in 1:nrow(config_data)){
     era_email = as.character(config_data[i, "era_email"])
     u_code = as.character(config_data[i, "u_code"])
     report_stakeholder = as.character(config_data[i, "stakeholder_name"])
+    stakeholder_email = as.character(config_data[i,"stakeholder_email"])
     
-    report_file_id <- copy_report(year, month, member, dest_folder_id, template_id)
+    report_file_id <- copy_report(year, month, member, dest_folder_id, template_id, stakeholder_email = stakeholder_email)
     report <-  report_gs(report_file_id)
     report_monthlyReport <- report %>% gs_read(ws = "Month dashboard")
     month_weeks <- get_month_eow_dates(year, month)
     month_events <- get_month_events(year,month)
+    month_day_first = ymd(paste0(year, "-", month, "-01"))
+    month_day_last = ymd(paste0(year, "-", (as.numeric(month)+1), "-01"))-1
     
     table_insert_week1 <- data.frame("Hours" = as.character(), "Task" = as.character(), "Activity" = as.character(), "Description" = as.character(), "Contact" = as.character(), "Date" = as.character(), stringsAsFactors = FALSE)
     table_insert_week2 <- data.frame("Hours" = as.character(), "Task" = as.character(), "Activity" = as.character(), "Description" = as.character(), "Contact" = as.character(), "Date" = as.character(), stringsAsFactors = FALSE)
@@ -114,9 +117,11 @@ for (i in 1:nrow(config_data)){
                     date)
       input = data.frame(input, stringsAsFactors = FALSE)
       # build month events
-      names(input) = names(table_insert_month)
-      table_insert_month = rbind(table_insert_month, input)
-      names(table_insert_month) = c("Hours", "Task", "Activity", "Description", "Contact", "Date")
+      if (date >= month_day_first & date <= month_day_last){
+        names(input) = names(table_insert_month)
+        table_insert_month = rbind(table_insert_month, input)
+        names(table_insert_month) = c("Hours", "Task", "Activity", "Description", "Contact", "Date")  
+      }
       
       if (date <= as.Date(as.character(month_weeks[1,1]), "%Y-%m-%d")){
         names(input) = names(table_insert_week1)
