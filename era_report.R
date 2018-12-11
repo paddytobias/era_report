@@ -4,7 +4,7 @@
 # intended to run at the end of each month
 # make sure set_up.R is run first and config.R is filled in
 
-# e.g. run, Rscript era_report.R MM YYYY
+# e.g. run, Rscript era_report.R MM YYYY eRA@intersect.org.au
 #             - MM and YYYY are placeholders for the month and year that you want to report on
 ########
 
@@ -38,6 +38,12 @@ if (is.na(month)){
 year = args[2]
 if (is.na(year)){
     year = format(as.Date(Sys.Date()), "%Y")
+}
+
+email = args[3]
+if (!is.na(email)){
+  config_data = config_data %>% 
+    filter(era_email == email)
 }
 
 

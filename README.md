@@ -2,6 +2,8 @@
 
 A program written in R to create monthly reports of eRA activities for the benefit of reporting to members. 
 
+Standard execution: `Rscript era_report.R MM YYYY era@intersect.org.au`. The third argument is optional if you want to run the script for just one person. 
+
 The program will create a report based on your calendar events for a specific month. You can give it the month and/or year to report on (e.g., `Rscript era_report.R 07 2018`) or you can use the default (`Rscript eRA_report.R`), which will produce you a report for the month previous from when you run the script.
 
 1.0 is designed to only run for one eRA at a time. 2.0 now does this for all eRAs and adds the monthly events to a running datasheet that can be used for MVR quarterly and annual reports. 
