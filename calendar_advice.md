@@ -20,11 +20,11 @@ So to recap, the syntax that should be used in your calendar is `[[Tag]]: [[Even
 ## eRA work ontologies and codes
 
 
-* `RS` or `Researcher Support` -  any direct work you are doing for or with a researcher
+* `RS` or `Research Support` or `Researcher Support` -  any direct work you are doing for or with a researcher
 * `SP` or `Strat & Planning` - any high-level reports or analysis you are doing for the university
 * `Eng` or `Engagement` - any presentations to a broad audience (not training) or meetings with prospective clients
 * `Me` - personal things like taking leave
 * `Admin` - admin tasks like replying to emails, cleaning your desk 
-* `Int` - tasks for Intersect, like MVRs, weekly meetings and TFTF, conducting training at other universities
+* `Int` or `Intersect` - tasks for Intersect, like MVRs, weekly meetings and TFTF, conducting training at other universities
 
 **Note: Please use the abbreviations where possible to minimise spelling errors in names and therefore inconsistent data in the reports.**
