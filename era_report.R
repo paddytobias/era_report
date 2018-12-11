@@ -11,6 +11,9 @@
 
 args = commandArgs(trailingOnly = TRUE)
 template_id = "17jPfpBXFyvOh0E5diaTfGJspm7LRvD4Jrv4dCXnvuh4" # do not touch
+mvr_id = "1D3jSTSzrcaeCjZEZWW8jLVgxmYGrKYJPDsY6jEw1RJE" # MVR tables
+
+
 
 source("libraries.R")
 source("config.r")
@@ -66,6 +69,7 @@ for (i in 1:nrow(config_data)){
     table_insert_week4 <- data.frame("Hours" = as.character(), "Task" = as.character(), "Activity" = as.character(), "Description" = as.character(), "Contact" = as.character(), "Date" = as.character(), stringsAsFactors = FALSE)
     table_insert_week5 <- data.frame("Hours" = as.character(), "Task" = as.character(), "Activity" = as.character(), "Description" = as.character(), "Contact" = as.character(), "Date" = as.character(), stringsAsFactors = FALSE)
     table_insert_month <- data.frame("Hours" = as.character(), "Task" = as.character(), "Activity" = as.character(), "Description" = as.character(), "Contact" = as.character(), "Date" = as.character(), stringsAsFactors = FALSE)
+    
     #for loop to create weekly work sheets and one for the month
     for (j in 1:nrow(month_events)){
       date = month_events$startDate[j]
@@ -87,6 +91,9 @@ for (i in 1:nrow(config_data)){
         who = "NA"
       }
       
+### SORTING OUT TAGGING
+      accepted_tags = data.frame(codes = c("RS", "Research Support", "Researcher Support", "SP", "Strat & Planning", "Eng", "Engagement", "Me", "Admin", "Int", "Intersect", "untagged"),
+                                 names = c("Research Support", "Research Support", "Research Support", "Strategy & Planning", "Strategy & Planning", "Engagement", "Engagement", "Personal", "Administration", "Intersect business", "Intersect business", "untagged"), stringsAsFactors = F)
       # utilising tags or "Activities"
       if (grepl("\\:", month_events$summary[j])){
         tag = gsub("(.*)(\\:)(.*)", "\\1", month_events$summary[j])
@@ -94,7 +101,18 @@ for (i in 1:nrow(config_data)){
         tag = "untagged"
       }
       
-      # cleaning up common long-winded descriptions
+      if (!(tag %in% accepted_tags$codes)){ ## controlling the vocab
+        tag = "untagged"
+      }
+      
+      ## standardising and prettifying tag names
+      tag = accepted_tags %>% 
+        filter(codes == tag) %>% 
+        select(names) %>% 
+        as.character()
+########
+      
+#### cleaning up common long-winded descriptions
       is_zoom_meeting = grepl("zoom.us", month_events$description[j])
       is_training = grepl("Course Materials", month_events$description[j])
       if(is_zoom_meeting) {
@@ -104,6 +122,8 @@ for (i in 1:nrow(config_data)){
       } else {
         description = month_events$description[j]
       }
+########
+      
       minutes = month_events$hours_long[j]
       hours = (as.numeric(minutes)%/%60 +  (as.numeric(minutes)%%60/60))
       
@@ -168,9 +188,7 @@ for (i in 1:nrow(config_data)){
     # sending era report link
     system(paste("Rscript email_out.R", report_link, era_email))
     
-    # update data in MVR tables
-    mvr_id = "1D3jSTSzrcaeCjZEZWW8jLVgxmYGrKYJPDsY6jEw1RJE"
-    
+##### UPDATE MVR DATA TABLE
     mvr_data = report_gs(mvr_id) 
     mvr_input = table_insert_month[c("Date", "Hours", "Task", "Activity")]
     mvr_input = cbind(u_code, era_email, mvr_input)
@@ -186,7 +204,6 @@ for (i in 1:nrow(config_data)){
       anti_join(old_mvr)
     
     names(new_mvr) = names(mvr_input)
-    
     mvr_input = rbind(new_mvr, mvr_input)
     
     mvr_data %>% 
