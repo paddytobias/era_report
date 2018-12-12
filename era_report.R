@@ -98,8 +98,8 @@ for (i in 1:nrow(config_data)){
       }
       
 ### SORTING OUT TAGGING
-      accepted_tags = data.frame(codes = c("RS", "Research Support", "Researcher Support", "SP", "Strat & Planning", "Eng", "Engagement", "Me", "Admin", "Int", "Intersect", "untagged"),
-                                 names = c("Research Support", "Research Support", "Research Support", "Strategy & Planning", "Strategy & Planning", "Engagement", "Engagement", "Personal", "Administration", "Intersect business", "Intersect business", "untagged"), stringsAsFactors = F)
+      accepted_tags = data.frame(codes = c("RS", "Research Support", "Researcher Support", "SP", "Strat & Planning", "Eng", "Engagement", "T", "Training", "Me", "Admin", "Int", "Intersect", "untagged"),
+                                 names = c("Research Support", "Research Support", "Research Support", "Strategy & Planning", "Strategy & Planning", "Engagement", "Engagement", "Training", "Training", "Personal", "Administration", "Intersect business", "Intersect business", "untagged"), stringsAsFactors = F)
       # utilising tags or "Activities"
       if (grepl("\\:", month_events$summary[j])){
         tag = gsub("(.*)(\\:)(.*)", "\\1", month_events$summary[j])
@@ -108,7 +108,7 @@ for (i in 1:nrow(config_data)){
       }
       
       if (!(tag %in% accepted_tags$codes)){ ## controlling the vocab
-        tag = "untagged"
+        tag = "tag not correct"
       }
       
       ## standardising and prettifying tag names
