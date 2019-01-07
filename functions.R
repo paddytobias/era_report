@@ -67,10 +67,17 @@ get_events = function(email_add){
 
 get_month_events = function(year, month){
   events = get_events(era_email)
+  start_month = as.Date(paste(year, month, "01", sep = "-"))
+  if(month == "12"){
+    start_next_month = paste(as.numeric(year)+1, "01", "01", sep = "-")
+  } else {
+    start_next_month = paste(year, as.numeric(month)+1, "01", sep = "-")
+  }
+  end_month = as.Date(start_next_month) - 1
   month_events = events %>%
-    filter(startDate > as.Date(paste(year, month, "01", sep = "-")) & startDate <= Sys.Date())
+    filter(startDate > start_month & startDate < end_month)
   #add hours column
-  month_events$hours_long = round(difftime(as.POSIXct(month_events$endTime,format="%H:%M:%S"), as.POSIXct(month_events$startTime,format="%H:%M:%S"), units = "mins"),2)
+  month_events$hours_long = round(difftime(as.POSIXct(month_events$end.dateTime,format="%Y-%m-%dT%H:%M:%S"), as.POSIXct(month_events$start.dateTime,format="%Y-%m-%dT%H:%M:%S"), units = "mins"),2)
   return(month_events)
 }
 
