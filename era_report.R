@@ -12,7 +12,7 @@
 args = commandArgs(trailingOnly = TRUE)
 template_id = "17jPfpBXFyvOh0E5diaTfGJspm7LRvD4Jrv4dCXnvuh4" # do not touch
 mvr_id = "1D3jSTSzrcaeCjZEZWW8jLVgxmYGrKYJPDsY6jEw1RJE" # MVR tables
-report_history_id = "14dxjfgqXMQtCx8wi3CHnm4Pd1K0urHK786-uVwnWSh4"
+report_log_id = "14dxjfgqXMQtCx8wi3CHnm4Pd1K0urHK786-uVwnWSh4"
 
 
 source("libraries.R")
@@ -199,7 +199,7 @@ for (i in 1:nrow(config_data)){
                                 "era" = as.character(era_email), 
                                 "link" = report_link)
     
-    report_log_conn = report_gs(report_history_id)
+    report_log_conn = report_gs(report_log_id)
     
     report_log = report_log_conn %>% 
       gs_read(ws = "log")
