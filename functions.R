@@ -75,7 +75,8 @@ get_month_events = function(year, month){
   }
   end_month = as.Date(start_next_month) - 1
   month_events = events %>%
-    filter(startDate > start_month & startDate < end_month)
+    filter(startDate > start_month & startDate < end_month) %>% 
+    arrange(desc(as.Date(startDate)))
   #add hours column
   month_events$hours_long = round(difftime(as.POSIXct(month_events$end.dateTime,format="%Y-%m-%dT%H:%M:%S"), as.POSIXct(month_events$start.dateTime,format="%Y-%m-%dT%H:%M:%S"), units = "mins"),2)
   return(month_events)
