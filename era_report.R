@@ -109,13 +109,15 @@ for (i in 1:nrow(config_data)){
       
       if (!(tag %in% accepted_tags$codes)){ ## controlling the vocab
         tag = "tag not correct"
+      } else {
+        ## standardising and prettifying tag names
+        tag = accepted_tags %>% 
+          filter(grepl(paste0("^",tag,"$"), codes, ignore.case=T)) %>% 
+          select(names) %>% 
+          as.character()
       }
       
-      ## standardising and prettifying tag names
-      tag = accepted_tags %>% 
-        filter(codes == tag) %>% 
-        select(names) %>% 
-        as.character()
+
 ########
       
 #### cleaning up common long-winded descriptions
