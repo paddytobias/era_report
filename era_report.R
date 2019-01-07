@@ -12,7 +12,7 @@
 args = commandArgs(trailingOnly = TRUE)
 template_id = "17jPfpBXFyvOh0E5diaTfGJspm7LRvD4Jrv4dCXnvuh4" # do not touch
 mvr_id = "1D3jSTSzrcaeCjZEZWW8jLVgxmYGrKYJPDsY6jEw1RJE" # MVR tables
-
+report_history_id = "14dxjfgqXMQtCx8wi3CHnm4Pd1K0urHK786-uVwnWSh4"
 
 
 source("libraries.R")
@@ -192,7 +192,28 @@ for (i in 1:nrow(config_data)){
     report_link = report$browser_url
     print(paste("Report saved to", report_link))
     
+    # save information to report log
+    report_details = data.frame("year" = as.character(year), 
+                                "month" = as.character(month), 
+                                "member" = as.character(member), 
+                                "era" = as.character(era_email), 
+                                "link" = report_link)
     
+    report_log_conn = report_gs(report_history_id)
+    
+    report_log = report_log_conn %>% 
+      gs_read(ws = "log")
+    
+    if (!grepl(pattern = report_link, x = report_log$link, fixed = T)){
+      report_log_nrow = nrow(report_log)
+      
+      report_log_conn %>% 
+        gs_edit_cells(ws = "log", anchor = paste0("A", report_history_old_nrow+2), input = report_details, col_names = F, byrow = T)
+    } else {
+      print("details already logged")
+    }
+    
+   
     # sending era report link
     system(paste("Rscript email_out.R", report_link, era_email))
     
