@@ -43,19 +43,26 @@ get_month_eow_dates = function(year, month){
 }
 
 get_events = function(email_add){
-  events = gc_summary(email_add) %>%
-    gc_event_ls(params = "maxResults=5000") %>%
-    mutate(startDate = paste(start.date, start.dateTime), endDate = paste(end.date, end.dateTime),
-           startTime = gsub("[0-9]{4}-[0-9]{2}-[0-9]{2}T|\\+[0-9]{2}:[0-9]{2}", "", start.dateTime),
-           endTime = gsub("[0-9]{4}-[0-9]{2}-[0-9]{2}T|\\+[0-9]{2}:[0-9]{2}", "", end.dateTime))#%>% filter(start.date>Sys.Date()-20)
+  events = gc_id(email_add)
+  if (!is.null(events)){
+    events = events %>%
+      gc_event_ls(params = "maxResults=5000") %>%
+      mutate(startDate = paste(start.date, start.dateTime), endDate = paste(end.date, end.dateTime),
+             startTime = gsub("[0-9]{4}-[0-9]{2}-[0-9]{2}T|\\+[0-9]{2}:[0-9]{2}", "", start.dateTime),
+             endTime = gsub("[0-9]{4}-[0-9]{2}-[0-9]{2}T|\\+[0-9]{2}:[0-9]{2}", "", end.dateTime))#%>% filter(start.date>Sys.Date()-20)
+    
+    events$startDate = trimws(gsub("(NA)", "", events$startDate))
+    events$endDate = trimws(gsub("NA", "", events$endDate))
+    
+    events$startDate = trimws(gsub("T[0-9]{2}:[0-9]{2}:[0-9]{2}\\+[0-9]{2}:[0-9]{2}", "", events$startDate))
+    events$endDate = trimws(gsub("T[0-9]{2}:[0-9]{2}:[0-9]{2}\\+[0-9]{2}:[0-9]{2}", "", events$endDate))
+    
+    return(events[with(events, order(as.Date(startDate), as.Date(endDate))),])
+  } else {
+    print(paste("Calendar for", email_add, "not found"))
+    next
+  }
   
-  events$startDate = trimws(gsub("(NA)", "", events$startDate))
-  events$endDate = trimws(gsub("NA", "", events$endDate))
-  
-  events$startDate = trimws(gsub("T[0-9]{2}:[0-9]{2}:[0-9]{2}\\+[0-9]{2}:[0-9]{2}", "", events$startDate))
-  events$endDate = trimws(gsub("T[0-9]{2}:[0-9]{2}:[0-9]{2}\\+[0-9]{2}:[0-9]{2}", "", events$endDate))
-  
-  return(events[with(events, order(as.Date(startDate), as.Date(endDate))),])
 }
 
 get_month_events = function(year, month){
