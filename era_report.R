@@ -67,7 +67,7 @@ for (i in 1:nrow(config_data)){
     report <-  report_gs(report_file_id)
     report_monthlyReport <- report %>% gs_read(ws = "Month dashboard")
     month_weeks <- get_month_eow_dates(year, month)
-    month_events <- get_month_events(year,month)
+    month_events <- get_month_events(era_email, year,month)
     
     table_insert_week1 <- data.frame("Hours" = as.character(), "Task" = as.character(), "Activity" = as.character(), "Description" = as.character(), "Contact" = as.character(), "Date" = as.character(), stringsAsFactors = FALSE)
     table_insert_week2 <- data.frame("Hours" = as.character(), "Task" = as.character(), "Activity" = as.character(), "Description" = as.character(), "Contact" = as.character(), "Date" = as.character(), stringsAsFactors = FALSE)

@@ -27,6 +27,21 @@ copy_report = function(year, month, member, dest_folder_id, template_id, stakeho
   
 }
 
+##---- to dynamically set globals for the month being reported
+get_month_start_dates = function(year, month){
+  start_month = as.Date(paste(year, month, "01", sep = "-"))
+  if(month == "12"){
+    start_next_month = paste(as.numeric(year)+1, "01", "01", sep = "-")
+  } else {
+    start_next_month = paste(year, as.numeric(month)+1, "01", sep = "-")
+  }
+  end_month = as.Date(start_next_month) - 1
+  
+  return(data.frame("start_month" = as.character(start_month), 
+                    "start_next_month" = as.character(start_next_month), 
+                    "end_month" = as.character(end_month), stringsAsFactors = F))
+}
+
 get_month_eow_dates = function(year, month){
   month_first_day = paste(year,month, "01", sep='-')
   month_dates = data.frame(dates = as.Date(seq.Date(from = as.Date(month_first_day), by = "day", length.out = 31)))
@@ -42,11 +57,15 @@ get_month_eow_dates = function(year, month){
   return(eow_dates)
 }
 
-get_events = function(email_add){
+
+##---- to return dataframe for calendar events of the month
+get_events = function(email_add, year, month){
+  month_start_dates = get_month_start_dates(year, month)
+  
   events = gc_id(email_add)
   if (!is.null(events)){
     events = events %>%
-      gc_event_ls(params = "maxResults=5000") %>%
+      gc_event_ls(params = paste0("maxResults=5000&timeMin=", month_start_dates$start_month, "T00:00:00+11:00&timeMax=", month_start_dates$start_next_month, "T00:00:00+11:00")) %>%
       mutate(startDate = paste(start.date, start.dateTime), endDate = paste(end.date, end.dateTime),
              startTime = gsub("[0-9]{4}-[0-9]{2}-[0-9]{2}T|\\+[0-9]{2}:[0-9]{2}", "", start.dateTime),
              endTime = gsub("[0-9]{4}-[0-9]{2}-[0-9]{2}T|\\+[0-9]{2}:[0-9]{2}", "", end.dateTime))#%>% filter(start.date>Sys.Date()-20)
@@ -65,17 +84,13 @@ get_events = function(email_add){
   
 }
 
-get_month_events = function(year, month){
-  events = get_events(era_email)
-  start_month = as.Date(paste(year, month, "01", sep = "-"))
-  if(month == "12"){
-    start_next_month = paste(as.numeric(year)+1, "01", "01", sep = "-")
-  } else {
-    start_next_month = paste(year, as.numeric(month)+1, "01", sep = "-")
-  }
-  end_month = as.Date(start_next_month) - 1
+get_month_events = function(era_email, year, month){
+  events = get_events(era_email, year, month)
+  
+  month_start_dates = get_month_start_dates(year, month)
+
   month_events = events %>%
-    filter(startDate > start_month & startDate < end_month) %>% 
+    filter(startDate > month_start_dates$start_month & startDate < month_start_dates$end_month) %>% 
     arrange(desc(as.Date(startDate)))
   #add hours column
   month_events$hours_long = round(difftime(as.POSIXct(month_events$end.dateTime,format="%Y-%m-%dT%H:%M:%S"), as.POSIXct(month_events$start.dateTime,format="%Y-%m-%dT%H:%M:%S"), units = "mins"),2)
