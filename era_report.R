@@ -208,7 +208,7 @@ for (i in 1:nrow(config_data)){
       report_log_nrow = nrow(report_log)
       
       report_log_conn %>% 
-        gs_edit_cells(ws = "log", anchor = paste0("A", report_history_old_nrow+2), input = report_details, col_names = F, byrow = T)
+        gs_edit_cells(ws = "log", anchor = paste0("A", report_log_nrow+2), input = report_details, col_names = F, byrow = T)
     } else {
       print("details already logged")
     }

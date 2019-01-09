@@ -97,10 +97,8 @@ get_month_events = function(era_email, year, month){
   return(month_events)
 }
 
-## connect with google sheet DVCR report
+## connect with google sheet 
 report_gs = function(report_file_id){
-  # month_name = month.abb[as.numeric(month)]
-  #  report_name <- paste0(month_name, year, "_eRA-report_", member)
   report <- gs_key(as_id(report_file_id))
 }
 
@@ -206,6 +204,6 @@ insert_weekly_tables = function(month_weeks, table_insert_week1, table_insert_we
 email_func = function(recipient_email, sender_email, recipient_name, report_link, era_name){
   email = mime(To = recipient_email, From = sender_email, 
                Subject = "New eRA report prepared",
-                body = paste0("Hi ", recipient_name, ", A new monthly report has been created for you.\n\nIt can be found here: ", report_link, "\n Regards,\n", era_name))
+                body = paste0("Hi ", recipient_name, ", A new monthly report has been created for you.\n\nIt can be found here: ", report_link, "\n Please review and then consider sending it to your university supervisor. Regards"))
   return(email)
 }
