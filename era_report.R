@@ -204,7 +204,8 @@ for (i in 1:nrow(config_data)){
     report_log = report_log_conn %>% 
       gs_read(ws = "log")
     
-    if (!grepl(pattern = report_link, x = report_log$link, fixed = T)){
+    isnt.present = !( report_link %in% report_log$link) ## check if report has been produced before.
+    if (isnt.present){
       report_log_nrow = nrow(report_log)
       
       report_log_conn %>% 
