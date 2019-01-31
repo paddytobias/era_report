@@ -28,4 +28,7 @@ So to recap, the syntax that should be used in your calendar is `[[Tag]]: [[Even
 * `Admin` - admin tasks like replying to emails, cleaning your desk 
 * `Int` or `Intersect` - tasks for Intersect, like MVRs, weekly meetings and TFTF, conducting training at other universities
 
+
+<iframe width="600" height="371" seamless frameborder="0" scrolling="no" src="https://docs.google.com/spreadsheets/d/e/2PACX-1vQkCcEnzws7OQEydNWCLqhD_vMcXkVUxpMu4dtlXYtpUKzvkhKhUdk_B0ETVoUNChHaQVUjY6_nbZug/pubchart?oid=1344834922&amp;format=interactive"></iframe>
+
 **Note: Please use the abbreviations where possible to minimise spelling errors in names and therefore inconsistent data in the reports.**

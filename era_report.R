@@ -11,9 +11,8 @@
 
 args = commandArgs(trailingOnly = TRUE)
 template_id = "17jPfpBXFyvOh0E5diaTfGJspm7LRvD4Jrv4dCXnvuh4" # do not touch
-mvr_id = "1D3jSTSzrcaeCjZEZWW8jLVgxmYGrKYJPDsY6jEw1RJE" # MVR tables
-report_log_id = "14dxjfgqXMQtCx8wi3CHnm4Pd1K0urHK786-uVwnWSh4"
-
+mvr_id = "1D3jSTSzrcaeCjZEZWW8jLVgxmYGrKYJPDsY6jEw1RJE" # keeping a total list of all eRA work ## do not touch
+report_log_id = "14dxjfgqXMQtCx8wi3CHnm4Pd1K0urHK786-uVwnWSh4"# for keeping a history of reports produced ## do not touch
 
 source("libraries.R")
 source("config.r")
@@ -76,7 +75,7 @@ for (i in 1:nrow(config_data)){
     table_insert_week5 <- data.frame("Hours" = as.character(), "Task" = as.character(), "Activity" = as.character(), "Description" = as.character(), "Contact" = as.character(), "Date" = as.character(), stringsAsFactors = FALSE)
     table_insert_month <- data.frame("Hours" = as.character(), "Task" = as.character(), "Activity" = as.character(), "Description" = as.character(), "Contact" = as.character(), "Date" = as.character(), stringsAsFactors = FALSE)
     
-    #for loop to create weekly work sheets and one for the month
+##---- for loop to create weekly work sheets and one for the month
     for (j in 1:nrow(month_events)){
       date = month_events$startDate[j]
       
@@ -97,30 +96,24 @@ for (i in 1:nrow(config_data)){
         who = "NA"
       }
       
-### SORTING OUT TAGGING
-      accepted_tags = data.frame(codes = c("RS", "Research Support", "Researcher Support", "SP", "Strat & Planning", "Eng", "Engagement", "T", "Training", "Me", "Admin", "Int", "Intersect", "untagged"),
-                                 names = c("Research Support", "Research Support", "Research Support", "Strategy & Planning", "Strategy & Planning", "Engagement", "Engagement", "Training", "Training", "Personal", "Administration", "Intersect business", "Intersect business", "untagged"), stringsAsFactors = F)
-      # utilising tags or "Activities"
+##---- categorising calendar events
       if (grepl("\\:", month_events$summary[j])){
         tag = gsub("(.*)(\\:)(.*)", "\\1", month_events$summary[j])
       } else {
         tag = "untagged"
       }
       
-      if (!(tag %in% accepted_tags$codes)){ ## controlling the vocab
+      if (!(tag %in% cat_ontols$codes)){ ## controlling the vocab
         tag = "tag not correct"
       } else {
         ## standardising and prettifying tag names
-        tag = accepted_tags %>% 
+        tag = cat_ontols %>% 
           filter(grepl(paste0("^",tag,"$"), codes, ignore.case=T)) %>% 
           select(names) %>% 
           as.character()
       }
       
-
-########
-      
-#### cleaning up common long-winded descriptions
+##---- cleaning up common long-winded descriptions
       is_zoom_meeting = grepl("zoom.us", month_events$description[j])
       is_training = grepl("Course Materials", month_events$description[j])
       if(is_zoom_meeting) {
