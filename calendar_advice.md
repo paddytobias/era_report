@@ -19,16 +19,17 @@ So to recap, the syntax that should be used in your calendar is `[[Tag]]: [[Even
 
 ## eRA work ontologies and codes
 
+There are eight categories that we use to describe our work:
+1. Research Support -  any direct work you are doing for or with a researcher
+2. Strategy & Planning - any high-level reports or analysis you are doing for the university
+3. Engagement - any presentations to a broad audience (not training) or meetings with prospective clients
+4. Training - all the training you do, including preparation time
+5. Administration - admin tasks like replying to emails, cleaning your desk 
+6. Intersect-internal - tasks for Intersect, like events
+7. Consortium - any work for the Intersect membership broadly, like MVRs, weekly meetings and TFTF, conducting training at other universities
+8. Personal - personal things like taking leave
 
-* `RS` or `Research Support` or `Researcher Support` -  any direct work you are doing for or with a researcher
-* `SP` or `Strat & Planning` - any high-level reports or analysis you are doing for the university
-* `Eng` or `Engagement` - any presentations to a broad audience (not training) or meetings with prospective clients
-* `T` or `Training` - all the training you do, including preparation time
-* `Me` - personal things like taking leave
-* `Admin` - admin tasks like replying to emails, cleaning your desk 
-* `Int` or `Intersect` - tasks for Intersect, like MVRs, weekly meetings and TFTF, conducting training at other universities
+Click on the link below to see the accepted codes for assigning these categories.
 
+<a href="https://docs.google.com/spreadsheets/d/e/2PACX-1vQkCcEnzws7OQEydNWCLqhD_vMcXkVUxpMu4dtlXYtpUKzvkhKhUdk_B0ETVoUNChHaQVUjY6_nbZug/pubchart?oid=1565865934&amp;format=interactive">Category ontologies</a>
 
-<a href="https://docs.google.com/spreadsheets/d/e/2PACX-1vQkCcEnzws7OQEydNWCLqhD_vMcXkVUxpMu4dtlXYtpUKzvkhKhUdk_B0ETVoUNChHaQVUjY6_nbZug/pubchart?oid=1344834922&amp;format=interactive">Category ontologies</a>
-
-**Note: Please use the abbreviations where possible to minimise spelling errors in names and therefore inconsistent data in the reports.**
