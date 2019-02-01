@@ -25,8 +25,6 @@ gmail_auth(id = client_id, secret = client_secret) # authenticate for Gmail
 
 source("report_authority.R")
 
-
-
 # globals
 month = args[1]
 if (is.na(month)){
@@ -135,6 +133,12 @@ for (i in 1:nrow(config_data)){
                     who, 
                     date)
       input = data.frame(input, stringsAsFactors = FALSE)
+      
+      ## catch events that are all day Personal Leave and assign 7.5 hours
+      if (is.na(input$hours) & input$tag=="Personal"){
+        input$hours=7.5
+      }
+        
       # build month events
       names(input) = names(table_insert_month)
       table_insert_month = rbind(table_insert_month, input)
@@ -211,26 +215,26 @@ for (i in 1:nrow(config_data)){
     # sending era report link
     system(paste("Rscript email_out.R", report_link, era_email))
     
-##### UPDATE MVR DATA TABLE
-    mvr_data = report_gs(mvr_id) 
-    mvr_input = table_insert_month[c("Date", "Hours", "Task", "Activity")]
-    mvr_input = cbind(u_code, era_email, mvr_input)
-    
-    mvr_era_activities = mvr_data %>% 
-      gs_read(ws = "era_activities")
-    
-    email = era_email
-    old_mvr = mvr_era_activities %>% 
-      filter(era_email == email & as.Date(Date) >= as.Date(ymd(paste0(year,month,"01"))))
-
-    new_mvr = mvr_era_activities %>% 
-      anti_join(old_mvr)
-    
-    names(new_mvr) = names(mvr_input)
-    mvr_input = rbind(new_mvr, mvr_input)
-    
-    mvr_data %>% 
-      gs_edit_cells(ws = "era_activities", input = mvr_input, anchor = "A1", byrow = TRUE, col_names = TRUE) 
+# ##### UPDATE MVR DATA TABLE
+#     mvr_data = report_gs(mvr_id) 
+#     mvr_input = table_insert_month[c("Date", "Hours", "Task", "Activity")]
+#     mvr_input = cbind(u_code, era_email, mvr_input)
+#     
+#     mvr_era_activities = mvr_data %>% 
+#       gs_read(ws = "era_activities")
+#     
+#     email = era_email
+#     old_mvr = mvr_era_activities %>% 
+#       filter(era_email == email & as.Date(Date) >= as.Date(ymd(paste0(year,month,"01"))))
+# 
+#     new_mvr = mvr_era_activities %>% 
+#       anti_join(old_mvr)
+#     
+#     names(new_mvr) = names(mvr_input)
+#     mvr_input = rbind(new_mvr, mvr_input)
+#     
+#     mvr_data %>% 
+#       gs_edit_cells(ws = "era_activities", input = mvr_input, anchor = "A1", byrow = TRUE, col_names = TRUE) 
   }
   
 }

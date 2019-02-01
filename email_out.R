@@ -9,7 +9,7 @@ args = commandArgs(trailingOnly = TRUE)
 
 report_link = args[1]
 era = args[2]
-
+gmail_auth()
 config = config_data %>% 
   filter(era_email==era)
 
