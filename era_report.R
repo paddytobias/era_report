@@ -80,9 +80,9 @@ for (i in 1:nrow(config_data)){
       ## clean ups
       # utilising title of event
       if (grepl("\\$", month_events$summary[j])) {
-        title = gsub("(.*)(\\$)(.*)", "\\1", month_events$summary[j])
+        title = trimws(gsub("(.*)(:)(.*)(\\$)(.*)", "\\3", month_events$summary[j]))
       } else {
-        title = month_events$summary[j]
+        title = trimws(gsub("(.*)(:)(.*)", "\\3", month_events$summary[j]))
       }
       
       # utilising who or "Contact"
