@@ -16,13 +16,19 @@ report_log_id = "14dxjfgqXMQtCx8wi3CHnm4Pd1K0urHK786-uVwnWSh4"# for keeping a hi
 
 source("libraries.R")
 source("config.r")
-source("functions.R") 
+
+if (!dir.exists("tokens")){
+  source("authing.R")
+}
 
 # authentication
-gc_auth(key = client_id, secret = client_secret, cache = TRUE) # authenticate for Google Sheets
-gs_auth(key = client_id, secret = client_secret, cache = TRUE) # authenticate for Google Cal
+gc_auth(token = "tokens/gc_token.rds") # authenticate for Google Sheets
+gs_auth(token = "tokens/gs_token.rds") # authenticate for Google Cal
 gmail_auth(id = client_id, secret = client_secret) # authenticate for Gmail
+drive_auth(path = "tokens/drive_auth.rds", cache = T) ## authenticate for Google Drive
 
+
+source("functions.R") 
 source("report_authority.R")
 
 # globals
@@ -59,7 +65,7 @@ for (i in 1:nrow(config_data)){
     u_code = as.character(config_data[i, "u_code"])
     report_stakeholder = as.character(config_data[i, "stakeholder_name"])
     stakeholder_email = as.character(config_data[i,"stakeholder_email"])
-    
+    ## first auth
     report_file_id <- copy_report(year, month, member, dest_folder_id, template_id, stakeholder_email = stakeholder_email)
     report <-  report_gs(report_file_id)
     report_monthlyReport <- report %>% gs_read(ws = "Month dashboard")
@@ -208,33 +214,14 @@ for (i in 1:nrow(config_data)){
       report_log_conn %>% 
         gs_edit_cells(ws = "log", anchor = paste0("A", report_log_nrow+2), input = report_details, col_names = F, byrow = T)
     } else {
-      print("details already logged")
+      message("details already logged")
     }
     
    
     # sending era report link
-    system(paste("Rscript email_out.R", report_link, era_email))
+    email_out_era(era_email, era_name, report_link, month, year)
+    message("Email sent to eRA")
     
-# ##### UPDATE MVR DATA TABLE
-#     mvr_data = report_gs(mvr_id) 
-#     mvr_input = table_insert_month[c("Date", "Hours", "Task", "Activity")]
-#     mvr_input = cbind(u_code, era_email, mvr_input)
-#     
-#     mvr_era_activities = mvr_data %>% 
-#       gs_read(ws = "era_activities")
-#     
-#     email = era_email
-#     old_mvr = mvr_era_activities %>% 
-#       filter(era_email == email & as.Date(Date) >= as.Date(ymd(paste0(year,month,"01"))))
-# 
-#     new_mvr = mvr_era_activities %>% 
-#       anti_join(old_mvr)
-#     
-#     names(new_mvr) = names(mvr_input)
-#     mvr_input = rbind(new_mvr, mvr_input)
-#     
-#     mvr_data %>% 
-#       gs_edit_cells(ws = "era_activities", input = mvr_input, anchor = "A1", byrow = TRUE, col_names = TRUE) 
   }
   
 }

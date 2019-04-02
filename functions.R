@@ -1,5 +1,11 @@
 source("libraries.R")
 
+gc_auth(token = "tokens/gc_token.rds") # authenticate for Google Sheets
+gs_auth(token = "tokens/gs_token.rds") # authenticate for Google Cal
+gmail_auth(id = client_id, secret = client_secret) # authenticate for Gmail
+#drive_auth(oauth_token = "tokens/drive_auth.rds")
+
+
 # functions
 copy_report = function(year, month, member, dest_folder_id, template_id, stakeholder_email){
   month_name = month.abb[as.numeric(month)]
@@ -150,11 +156,11 @@ top_20_projects = function(){
 
 insert_weekly_tables = function(month_weeks, table_insert_week1, table_insert_week2, table_insert_week3, table_insert_week4, table_insert_week5, table_insert_month){
   #insert eow dates in Monthly report sheet
-  report %>% gs_edit_cells(ws = "look_ups", input = month_weeks, anchor = "D2", byrow = TRUE, col_names = FALSE)
+  report %>% gs_edit_cells(ws = "look_ups", input = month_weeks, anchor = "D2", byrow = TRUE, col_names = FALSE, verbose = F)
   
   #insert top 10 projects in Monthly report sheet
   top_20_projects = top_20_projects()
-  report %>% gs_edit_cells(ws = "Top 20 activities", input = top_20_projects, anchor = "B4", byrow = TRUE, col_names = FALSE)
+  report %>% gs_edit_cells(ws = "Top 20 activities", input = top_20_projects, anchor = "B4", byrow = TRUE, col_names = FALSE, verbose = F)
   
   #insert weekly sheets to Google
   anchor = "A4"
@@ -163,47 +169,62 @@ insert_weekly_tables = function(month_weeks, table_insert_week1, table_insert_we
   if (nrow(table_insert_week1)!=0){
     table_insert_week1 = table_clean_up(table_insert_week1)
     table_insert_week1 = table_insert_week1[,c(6,1:5)]
-    report %>% gs_edit_cells(ws = worksheet, input = table_insert_week1, anchor = anchor, byrow = TRUE)
+    report %>% gs_edit_cells(ws = worksheet, input = table_insert_week1, anchor = anchor, byrow = TRUE, verbose = F)
   }
   worksheet = "Week 2"
   if (nrow(table_insert_week2)!=0){
     table_insert_week2 = table_clean_up(table_insert_week2)
     table_insert_week2 = table_insert_week2[,c(6,1:5)]
-    report %>% gs_edit_cells(ws = worksheet, input = table_insert_week2, anchor = anchor, byrow = TRUE)
+    report %>% gs_edit_cells(ws = worksheet, input = table_insert_week2, anchor = anchor, byrow = TRUE, verbose = F)
   }
   worksheet = "Week 3"
   if (nrow(table_insert_week3)!=0){
     table_insert_week3 = table_clean_up(table_insert_week3)
     table_insert_week3 = table_insert_week3[,c(6,1:5)]
-    report %>% gs_edit_cells(ws = worksheet, input = table_insert_week3, anchor = anchor, byrow = TRUE)
+    report %>% gs_edit_cells(ws = worksheet, input = table_insert_week3, anchor = anchor, byrow = TRUE, verbose = F)
   }
   
   worksheet = "Week 4"
   if (nrow(table_insert_week4)!=0){
     table_insert_week4 = table_clean_up(table_insert_week4)
     table_insert_week4 = table_insert_week4[,c(6,1:5)]
-    report %>% gs_edit_cells(ws = worksheet, input = table_insert_week4, anchor = anchor, byrow = TRUE)
+    report %>% gs_edit_cells(ws = worksheet, input = table_insert_week4, anchor = anchor, byrow = TRUE, verbose = F)
   }
   
   worksheet = "Week 5"
   if (nrow(table_insert_week5)!=0){
     table_insert_week5 = table_clean_up(table_insert_week5)
     table_insert_week5 = table_insert_week5[,c(6,1:5)]
-    report %>% gs_edit_cells(ws = worksheet, input = table_insert_week5, anchor = anchor, byrow = TRUE)
+    report %>% gs_edit_cells(ws = worksheet, input = table_insert_week5, anchor = anchor, byrow = TRUE, verbose = F)
   }
   
   worksheet = "All month events"
   if (nrow(table_insert_month)!=0){
     table_insert_month = table_clean_up(table_insert_month)
     table_insert_month = table_insert_month[,c(6,1:5)]
-    report %>% gs_edit_cells(ws = worksheet, input = table_insert_month, anchor = anchor, byrow = TRUE)
+    report %>% gs_edit_cells(ws = worksheet, input = table_insert_month, anchor = anchor, byrow = TRUE, verbose = F)
   }
 }
 
 
-email_func = function(recipient_email, sender_email, recipient_name, report_link, era_name){
+email_func = function(recipient_email, sender_email, recipient_name, report_link, month, year){
+  month_friendly = format(as.Date(paste(1, month, year, sep = "-"), "%d-%m-%Y"), "%B %Y")
   email = mime(To = recipient_email, From = sender_email, 
-               Subject = "New eRA report prepared",
-                body = paste0("Hi ", recipient_name, ", A new monthly report has been created for you.\n\nIt can be found here: ", report_link, "\n Please review and then consider sending it to your university supervisor. Regards"))
+               Subject = paste("New eRA report for", month_friendly),
+                body = paste0("Hi ", recipient_name, ", 
+
+Your monthly report for ", month_friendly, " has been created for you.
+
+It can be found here: ", report_link, "
+
+Please review and consider sending onto your university stakeholder 
+
+Have a nice day!"))
   return(email)
 }
+
+email_out_era = function(era_email, era_name, report_link, month, year){
+  email = email_func(era_email, era_email, era_name, report_link, month, year)
+  send_message(email)
+}
+
