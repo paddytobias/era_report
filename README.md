@@ -36,6 +36,9 @@ If you are going to be the designated "report runner", there's a few things you'
 ## First time running the report
 You will have to interactively authenticate the program the first time you run it. This effectively just means that you have to press a few buttons in the web browser as it pops up.
 
+To do this, run:
+`Rscript authing.R`
+
 ## Running the report builder each month
 * Navigate to the directory hold the program in the terminal
 * Run `rm .httr-oauth` to delete the old credentials - this step is due to a current issue with the `googlecalendars` R package not storing the credentials properly.

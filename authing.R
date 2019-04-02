@@ -1,7 +1,8 @@
 source("libraries.R")
 
 dir = "tokens"
-client = list.files()[grep("client_secret*", list.files())] %>% 
+client_name = list.files()[grep("client_secret*", list.files())]
+client = client_name %>% 
   read_json()
 
 
@@ -15,7 +16,7 @@ saveRDS(token, file = file.path(dir, "gs_token.rds"))
 token = gc_auth(key = client$installed$client_id, secret = client$installed$client_secret, cache = FALSE)
 saveRDS(token, file = file.path(dir, "gc_token.rds"))
 
-# token = gmail_auth(id = client$installed$client_id, secret = client$installed$client_secret)
+token = gmail_auth(secret_file = client_name) 
 # saveRDS(token, file = file.path(dir, "gmail_token.rds"))
 
 token = drive_auth()

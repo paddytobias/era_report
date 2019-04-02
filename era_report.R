@@ -215,13 +215,13 @@ for (i in 1:nrow(config_data)){
       report_log_conn %>% 
         gs_edit_cells(ws = "log", anchor = paste0("A", report_log_nrow+2), input = report_details, col_names = F, byrow = T)
     } else {
-      message("details already logged")
+      base::message("details already logged")
     }
     
-    print("about to send email")
+    base::message("About to send email")
     # sending era report email notifications
     email_out_era(era_email, era_name, report_link, month, year)
-    message("Email sent to eRA")
+    base::message("Email sent to eRA")
     
   }
   
