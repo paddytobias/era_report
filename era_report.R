@@ -14,21 +14,22 @@ template_id = "17jPfpBXFyvOh0E5diaTfGJspm7LRvD4Jrv4dCXnvuh4" # do not touch
 mvr_id = "1D3jSTSzrcaeCjZEZWW8jLVgxmYGrKYJPDsY6jEw1RJE" # keeping a total list of all eRA work ## do not touch
 report_log_id = "14dxjfgqXMQtCx8wi3CHnm4Pd1K0urHK786-uVwnWSh4"# for keeping a history of reports produced ## do not touch
 
-source("libraries.R")
-source("config.r")
 
 if (!dir.exists("tokens")){
   source("authing.R")
 }
 
+source("libraries.R")
+source("functions.R") 
+client = read_json(get_client("client_secret*"))
+
+
 # authentication
 gc_auth(token = "tokens/gc_token.rds") # authenticate for Google Sheets
 gs_auth(token = "tokens/gs_token.rds") # authenticate for Google Cal
-gmail_auth(id = client_id, secret = client_secret) # authenticate for Gmail
-drive_auth(path = "tokens/drive_auth.rds", cache = T) ## authenticate for Google Drive
+gmail_auth(secret_file = get_client("client_secret*")) 
+drive_auth(oauth_token = "tokens/drive_auth.rds") ## authenticate for Google Drive
 
-
-source("functions.R") 
 source("report_authority.R")
 
 # globals
@@ -217,8 +218,8 @@ for (i in 1:nrow(config_data)){
       message("details already logged")
     }
     
-   
-    # sending era report link
+    print("about to send email")
+    # sending era report email notifications
     email_out_era(era_email, era_name, report_link, month, year)
     message("Email sent to eRA")
     
