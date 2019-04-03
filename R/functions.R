@@ -1,11 +1,12 @@
 source("libraries.R")
-client = list.files()[grep("client_secret*", list.files())]
+client = list.files("..", full.names = T)[grep("client_secret*", list.files("..", full.names = T))]
 
 
-gc_auth(token = "tokens/gc_token.rds") # authenticate for Google Sheets
-gs_auth(token = "tokens/gs_token.rds") # authenticate for Google Cal
-gmail_auth(secret_file = client)
-drive_auth(oauth_token = "tokens/drive_auth.rds")
+gc_auth(token = "../tokens/gc_token.rds") # authenticate for Google Sheets
+gs_auth(token = "../tokens/gs_token.rds") # authenticate for Google Cal
+#gmail_auth(secret_file = client)
+gmail_auth(token = "../tokens/gmail_token.rds")
+drive_auth(oauth_token = "../tokens/drive_auth.rds")
 
 
 # functions
@@ -233,5 +234,5 @@ email_out_era = function(era_email, era_name, report_link, month, year){
 
 
 get_client = function(pattern){
-  list.files()[grep(pattern, list.files())]
+  list.files("..", full.names = T)[grep(pattern, list.files("../", full.names = T))]
 }

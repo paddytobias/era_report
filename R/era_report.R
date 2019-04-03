@@ -15,20 +15,20 @@ mvr_id = "1D3jSTSzrcaeCjZEZWW8jLVgxmYGrKYJPDsY6jEw1RJE" # keeping a total list o
 report_log_id = "14dxjfgqXMQtCx8wi3CHnm4Pd1K0urHK786-uVwnWSh4"# for keeping a history of reports produced ## do not touch
 
 
-if (!dir.exists("tokens")){
-  source("authing.R")
+if (!dir.exists("../tokens")){
+  stop("ERROR: You must run authing.R on the first run.")
 }
 
 source("libraries.R")
 source("functions.R") 
-client = read_json(get_client("client_secret*"))
+client = get_client("client_secret*") %>% 
+  read_json()
 
 
 # authentication
-gc_auth(token = "tokens/gc_token.rds") # authenticate for Google Sheets
-gs_auth(token = "tokens/gs_token.rds") # authenticate for Google Cal
-#gmail_auth(token = "tokens/gmail_token.rds")
-drive_auth(oauth_token = "tokens/drive_auth.rds") ## authenticate for Google Drive
+gc_auth(token = "../tokens/gc_token.rds") # authenticate for Google Sheets
+gs_auth(token = "../tokens/gs_token.rds") # authenticate for Google Cal
+drive_auth(oauth_token = "../tokens/drive_auth.rds") ## authenticate for Google Drive
 
 source("report_authority.R")
 
@@ -36,7 +36,6 @@ source("report_authority.R")
 month = args[1]
 if (is.na(month)){
     month = format(as.Date(Sys.Date()-months(1)), "%m")
-    
 }
 
 year = args[2]

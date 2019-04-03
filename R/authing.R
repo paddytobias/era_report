@@ -1,7 +1,7 @@
 source("libraries.R")
 
-dir = "tokens"
-client_name = list.files()[grep("client_secret*", list.files())]
+dir = "../tokens"
+client_name = list.files("..", full.names = T)[grep("client_secret*", list.files("..", full.names = T))]
 client = client_name %>% 
   read_json()
 
