@@ -17,7 +17,7 @@ token = gc_auth(key = client$installed$client_id, secret = client$installed$clie
 saveRDS(token, file = file.path(dir, "gc_token.rds"))
 
 token = gmail_auth(secret_file = client_name) 
-# saveRDS(token, file = file.path(dir, "gmail_token.rds"))
+saveRDS(token, file = file.path(dir, "gmail_token.rds"))
 
 token = drive_auth()
 saveRDS(token, file.path(dir, "drive_auth.rds"))

@@ -6,4 +6,5 @@ era_report_dev.Rproj
 .httr-oauth
 config.r
 tokens/
+client_secret*
 
