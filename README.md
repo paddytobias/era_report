@@ -3,7 +3,13 @@
 A program written in R to create monthly reports of eResearch Analyst activities for the benefit of reporting to members.
 
 ## Standard execution
-Standard execution: `Rscript era_report.R MM YYYY era@intersect.org.au`. The third argument is optional for when you want to run the script for just one person.
+Standard execution:
+
+```cd R/
+Rscript era_report.R MM YYYY era@intersect.org.au
+```
+
+The third argument is optional for when you want to run the script for just one person.
 
 The program will create a report based on your calendar events for a specific month. You can give it the month and/or year to report on (e.g., `Rscript era_report.R 07 2018`) or you can use the default (`Rscript eRA_report.R`), which will produce you a report for the month previous from when you run the script.
 
