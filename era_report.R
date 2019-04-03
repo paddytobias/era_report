@@ -27,7 +27,7 @@ client = read_json(get_client("client_secret*"))
 # authentication
 gc_auth(token = "tokens/gc_token.rds") # authenticate for Google Sheets
 gs_auth(token = "tokens/gs_token.rds") # authenticate for Google Cal
-gmail_auth(secret_file = get_client("client_secret*")) 
+gmail_auth(token = "tokens/gmail_token.rds")
 drive_auth(oauth_token = "tokens/drive_auth.rds") ## authenticate for Google Drive
 
 source("report_authority.R")

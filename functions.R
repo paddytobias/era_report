@@ -4,7 +4,7 @@ client = list.files()[grep("client_secret*", list.files())]
 
 gc_auth(token = "tokens/gc_token.rds") # authenticate for Google Sheets
 gs_auth(token = "tokens/gs_token.rds") # authenticate for Google Cal
-gmail_auth(secret_file = client) # authenticate for Gmail
+gmail_auth(token = "tokens/gmail_token.rds")
 drive_auth(oauth_token = "tokens/drive_auth.rds")
 
 
