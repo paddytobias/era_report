@@ -21,8 +21,6 @@ if (!dir.exists("../tokens")){
 
 source("libraries.R")
 source("functions.R") 
-client = get_client("client_secret*") %>% 
-  read_json()
 
 
 # authentication
