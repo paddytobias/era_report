@@ -8,9 +8,18 @@ A program written in R to create monthly reports of eResearch Analyst activities
 Standard execution:
 
 ```cd R/
+Rscript era_report.R
+```
+
+The program will run looping over all eRAs and generating a report for each. The reports are created for the previous month of work.
+
+### Optional first and second arguments
+
+```cd R/
 Rscript era_report.R MM YYYY
 ```
-The program will create a report based on your calendar events for a specific month. You can give it the month and/or year to report on (e.g., `Rscript era_report.R 07 2018`) or you can use the default (`Rscript eRA_report.R`), which will produce you a report for the month previous from when you run the script.
+
+The program can take arguments for a specific month and year for the specific month you want the report to capture. This ability means that the program can be run retrospective or, e.g., even in a loop of months across a whole year. 
 
 ### Optional third argument
 
@@ -52,9 +61,10 @@ To do this, run:
 `Rscript authing.R`
 
 ## Running the report builder each month
-* Navigate to the directory hold the program in the terminal
+* Navigate to the `R/` directory holding the program in the terminal
 * Then run the [standard execution](#standard-execution) for the `era_report.R` script.
 
+If you wish to set this up as a cron job, then you can use the `run_report.sh` script. Running this script will record the time for each runs in `log.txt`.
 
 ## History of the program
 2.0 now does this for all eRAs and adds the monthly events to a running datasheet that can be used for MVR quarterly and annual reports. 1.0 was designed to only run for one eRA at a time.
