@@ -24,8 +24,8 @@ source("functions.R")
 
 
 # authentication
-gc_auth(token = "../tokens/gc_token.rds") # authenticate for Google Sheets
-gs_auth(token = "../tokens/gs_token.rds") # authenticate for Google Cal
+gc_auth(token = "../tokens/gc_token.rds") # authenticate for Google Cal
+gs_auth(token = "../tokens/gs_token.rds") # authenticate for Google Sheets
 drive_auth(oauth_token = "../tokens/drive_auth.rds") ## authenticate for Google Drive
 
 source("report_authority.R")

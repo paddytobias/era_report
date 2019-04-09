@@ -1,5 +1,4 @@
 import sys
-print sys.path
 sys.path.append('/Library/Frameworks/Python.framework/Versions/2.7/lib/python2.7/site-packages')
 
 import ldap3
@@ -7,7 +6,6 @@ from pprint import pprint
 import pandas as pd
 
 ldap_uri = 'ldap://ldap.deakin.edu.au'
-#SEARCH_BASE = 'ou=People,dc=deakin,dc=edu,dc=au'
 search_base = 'ou=People,dc=deakin,dc=edu,dc=au'
 attrs = ['*']
 
